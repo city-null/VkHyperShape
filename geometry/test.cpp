@@ -19,7 +19,7 @@ void GeometryTest::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout l
     mWireframe.Draw(command);
 }
 
-void GeometryTest::Update(){
+void GeometryTest::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     Vertex v;

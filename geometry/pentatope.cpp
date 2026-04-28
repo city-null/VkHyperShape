@@ -85,7 +85,7 @@ void Pentatope::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layo
     mWireframe.Draw(command);
 }
 
-void Pentatope::Update(){
+void Pentatope::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     vertices = generatePentatope();

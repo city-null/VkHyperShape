@@ -125,7 +125,7 @@ void TwentyFourCell::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout
     mWireframe.Draw(command);
 }
 
-void TwentyFourCell::Update(){
+void TwentyFourCell::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     vertices = generateTwentyFourCell();

@@ -54,7 +54,7 @@ public:
     virtual void Draw(vk::CommandBuffer command, vk::PipelineLayout layout) = 0;
     virtual void DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout) = 0;
 
-    virtual void Update() = 0;
+    virtual void Update(const void *useData = nullptr) = 0;
     
     virtual void Setup(const vulkan::Device&device, vk::Queue graphics, const vulkan::Pool&pool);
 };

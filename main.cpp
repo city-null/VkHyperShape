@@ -15,6 +15,7 @@
 #endif
 #include "geometry/grid.h"
 #include "geometry/clifford.h"
+#include "geometry/cylinder.h"
 #include "geometry/tesseract.h"
 #include "geometry/pentatope.h"
 #include "geometry/cylindrical.h"
@@ -43,6 +44,7 @@ struct ImGuiInput{
     bool fill = true;
     bool ortho = false;
     bool clifford = false;
+    bool cylinder = false;
     bool tesseract = true;
     bool pentatope = false;
     bool cylindrical = false;
@@ -51,6 +53,7 @@ struct ImGuiInput{
     bool hypersphere = false;
     bool twentyFourCell = false;
     bool UpdateGeometry = false;
+    CylinderParameter parameter;
 #ifdef DEBUG
     bool testGeometry = false;
 #endif
@@ -59,6 +62,7 @@ struct ImGuiInput{
         grid4d = false;
         grid3d = false;
         clifford = false;
+        cylinder = false;
         tesseract = false;
         pentatope = false;
         cylindrical = false;
@@ -91,6 +95,11 @@ struct ImGuiInput{
     void SelectTwentyFourCell(){
         UnSelect();
         twentyFourCell = true;
+        UpdateGeometry = true;
+    }
+    void SelectCylinder(){
+        UnSelect();
+        cylinder = true;
         UpdateGeometry = true;
     }
     void SelectClifford(){
@@ -235,7 +244,7 @@ void UpdateUniform(const vulkan::Device&device){
 }
 void ShowGeometry(){
     ImGui::SeparatorText("几何");
-    const std::array currentItems = { "超立方体", "超球", "正五胞体", "正十六胞体", "正二十四胞体", "Clifford环面", "超圆柱", "克莱因瓶", "三维网格", "四维网格",
+    const std::array currentItems = { "超立方体", "超圆柱", "超球", "贝塞尔管道", "正五胞体", "正十六胞体", "正二十四胞体", "Clifford环面", "克莱因瓶", "三维网格", "四维网格",
 #ifdef DEBUG
         "图元测试"
 #endif
@@ -269,6 +278,9 @@ void ShowGeometry(){
                 }
                 else if(geometry == "超圆柱"){
                     g_ImGuiInput.SelectCylindrical();
+                }
+                else if(geometry == "贝塞尔管道"){
+                    g_ImGuiInput.SelectCylinder();
                 }
                 else if(geometry == "三维网格"){
                     g_ImGuiInput.SelectGrid3D();
@@ -350,6 +362,21 @@ void UpdateImGui(VkCommandBuffer command){
         }
         ShowRotate();
         ShowGeometry();
+        if(g_ImGuiInput.cylinder){
+            if(ImGui::InputFloat("半径", &g_ImGuiInput.parameter.radius)){
+                g_Geometry->Update(&g_ImGuiInput.parameter);
+            }
+            if(ImGui::InputFloat("采样率", &g_ImGuiInput.parameter.samples)){
+                g_Geometry->Update(&g_ImGuiInput.parameter);
+            }
+            for (size_t i = 0; i < 4; i++){
+                char label[0xff];
+                sprintf(label, "点%d", i);
+                if(ImGui::InputFloat4(label, g_ImGuiInput.parameter.point[i].data())){
+                    g_Geometry->Update(&g_ImGuiInput.parameter);
+                }
+            }
+        }
     }
     ImGui::End();
     ImGui::Render();
@@ -625,6 +652,9 @@ void display(GLFWwindow* window){
         else if(g_ImGuiInput.clifford){
             g_Geometry = new Clifford;
         }
+        else if(g_ImGuiInput.cylinder){
+            g_Geometry = new Cylinder;
+        }
         else if(g_ImGuiInput.kleinBottle){
             g_Geometry = new KleinBottle;
         }
@@ -646,7 +676,7 @@ void display(GLFWwindow* window){
         }
 #endif
         g_Geometry->Setup(g_VulkanDevice, g_VulkanQueue.graphics, g_VulkanPool);
-        g_Geometry->Update();
+        g_Geometry->Update(&g_ImGuiInput.parameter);
         UpdateUniform(g_VulkanDevice);
     }
     if(g_VulkanDevice.IsEnableDynamicRendering()){

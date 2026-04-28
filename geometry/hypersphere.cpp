@@ -19,7 +19,7 @@ void Hypersphere::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout la
     mHypersphere.Draw(command);
 }
 
-void Hypersphere::Update(){
+void Hypersphere::Update(const void *useData){
     int stacks = 20;     // ψ方向分段数 (纬度)
     int sectors = 20;    // φ方向分段数 (纬度)
     int circles = 20;    // θ方向分段数 (经度)

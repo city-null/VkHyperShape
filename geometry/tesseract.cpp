@@ -204,7 +204,7 @@ void Tesseract::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layo
     mWireframe.Draw(command);
 }
 
-void Tesseract::Update(){
+void Tesseract::Update(const void *useData){
     CreateTesseract();
     CreateWireframe();
 }

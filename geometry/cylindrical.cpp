@@ -221,7 +221,7 @@ void Cylindrical::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout la
     mWireframe.Draw(command);
 }
 
-void Cylindrical::Update(){
+void Cylindrical::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     generateHyperCylinder(vertices, indices);

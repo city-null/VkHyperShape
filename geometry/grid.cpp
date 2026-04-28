@@ -13,7 +13,7 @@ void Grid3D::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout)
     mGrid.Draw(command);
 }
 
-void Grid3D::Update(){
+void Grid3D::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
 
@@ -119,7 +119,7 @@ void Grid4D::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout)
     mGrid.Draw(command);
 }
 
-void Grid4D::Update(){
+void Grid4D::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
 

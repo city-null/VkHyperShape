@@ -64,7 +64,7 @@ void SixteenCell::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout la
     mWireframe.Draw(command);
 }
 
-void SixteenCell::Update(){
+void SixteenCell::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
     vertices = generateSixteenCell();

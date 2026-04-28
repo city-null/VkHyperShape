@@ -11,6 +11,6 @@ public:
     virtual void Draw(vk::CommandBuffer command, vk::PipelineLayout layout);
     virtual void DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout);
 
-    virtual void Update();
+    virtual void Update(const void *useData = nullptr);
 };
 #endif

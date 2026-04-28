@@ -102,7 +102,7 @@ void KleinBottle::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout la
     mKleinBottle.Draw(command);
 }
 
-void KleinBottle::Update(){
+void KleinBottle::Update(const void *useData){
     std::vector<Vertex>vertices;
     std::vector<uint16_t>indices;
     // generate(vertices, indices);

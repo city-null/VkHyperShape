@@ -95,7 +95,7 @@ void Clifford::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layou
     mWireframe.Draw(command);
 }
 
-void Clifford::Update(){
+void Clifford::Update(const void *useData){
     const glm::uvec2 segments = glm::uvec2(64);
     std::vector<Vertex> vertices = generateCliffordTorusVertices(segments.x, segments.y);
     std::vector<uint16_t> indices = generateCliffordTorusIndices(segments.x, segments.y);

@@ -1,12 +1,18 @@
-#ifndef CLIFFORD_H
-#define CLIFFORD_H
+#ifndef CYLINDER_H
+#define CYLINDER_H
 #include "geometry.h"
-class Clifford:public Geometry{
+struct CylinderParameter{
+    float radius = .05;
+    float samples = 20;
+    uint32_t segments = 16;
+    std::array<float, 4>point[4] = { {1, 0, 0, 0}, { 0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1} };
+};
+class Cylinder:public Geometry{
     vulkan::Primitive mGeometry;
     vulkan::Primitive mWireframe;
 public:
-    Clifford(/* args */);
-    ~Clifford();
+    Cylinder(/* args */);
+    ~Cylinder();
     virtual void Cleanup();
 
     virtual void Draw(vk::CommandBuffer command, vk::PipelineLayout layout);
