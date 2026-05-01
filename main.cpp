@@ -13,16 +13,16 @@
 #ifdef DEBUG
 #include "geometry/test.h"
 #endif
-#include "geometry/font.h"
 #include "geometry/grid.h"
 #include "geometry/clifford.h"
+#include "geometry/cylinder.h"
 #include "geometry/tesseract.h"
+#include "geometry/hexadeca.h"
+#include "geometry/icositetra.h"
 #include "geometry/pentatope.h"
 #include "geometry/cylindrical.h"
-#include "geometry/sixteenCell.h"
 #include "geometry/kleinBottle.h"
 #include "geometry/hypersphere.h"
-#include "geometry/twentyFourCell.h"
 struct ImGuiPlaneInput{
     float angle;
     std::string splane;
@@ -44,15 +44,16 @@ struct ImGuiInput{
     bool fill = true;
     bool font = false;
     bool ortho = false;
+    bool sphere = false;
     bool clifford = false;
     bool cylinder = false;
     bool tesseract = true;
+    bool icositetra = false;
+    bool hexadeca = false;
     bool pentatope = false;
     bool cylindrical = false;
-    bool sixteenCell = false;
     bool kleinBottle = false;
     bool hypersphere = false;
-    bool twentyFourCell = false;
     bool UpdateGeometry = false;
     CylinderParameter parameter;
 #ifdef DEBUG
@@ -63,15 +64,16 @@ struct ImGuiInput{
         ortho = false;
         grid4d = false;
         grid3d = false;
+        sphere = false;
         clifford = false;
         cylinder = false;
         tesseract = false;
+        icositetra = false;
+        hexadeca = false;
         pentatope = false;
         cylindrical = false;
-        sixteenCell = false;
         kleinBottle = false;
         hypersphere = false;
-        twentyFourCell = false;
         // memset(this, 0, sizeof(ImGuiInput));
     }
 #ifdef DEBUG
@@ -86,14 +88,19 @@ struct ImGuiInput{
         tesseract = true;
         UpdateGeometry = true;
     }
+    void SelectSphere(){
+        UnSelect();
+        sphere = true;
+        UpdateGeometry = true;
+    }
     void SelectPentatope(){
         UnSelect();
         pentatope = true;
         UpdateGeometry = true;
     }
-    void SelectTwentyFourCell(){
+    void SelectIcositetra(){
         UnSelect();
-        twentyFourCell = true;
+        icositetra = true;
         UpdateGeometry = true;
     }
     void SelectCylinder(){
@@ -106,9 +113,9 @@ struct ImGuiInput{
         clifford = true;
         UpdateGeometry = true;
     }
-    void SelectSixteenCell(){
+    void SelectHexadeca(){
         UnSelect();
-        sixteenCell = true;
+        hexadeca = true;
         UpdateGeometry = true;
     }
     void SelectKleinBottle(){
@@ -248,7 +255,7 @@ void UpdateUniform(const vulkan::Device&device){
 }
 void ShowGeometry(){
     ImGui::SeparatorText("几何");
-    const std::array currentItems = { "超立方体", "超圆柱", "超球", "贝塞尔管道", "四维字", "正五胞体", "正十六胞体", "正二十四胞体", "Clifford环面", "克莱因瓶", "三维网格", "四维网格",
+    const std::array currentItems = { "超立方体", "超圆柱", "球", "超球", "贝塞尔管道", "四维字", "正五胞体", "正十六胞体", "正二十四胞体", "Clifford环面", "克莱因瓶", "三维网格", "四维网格",
 #ifdef DEBUG
         "图元测试"
 #endif
@@ -262,6 +269,9 @@ void ShowGeometry(){
                 if(geometry == "超立方体"){
                     g_ImGuiInput.SelectTesseract();
                 }
+                else if(geometry == "球"){
+                    g_ImGuiInput.SelectSphere();
+                }
                 else if(geometry == "超球"){
                     g_ImGuiInput.SelectHypersphere();
                 }
@@ -269,10 +279,10 @@ void ShowGeometry(){
                     g_ImGuiInput.SelectPentatope();
                 }
                 else if(geometry == "正十六胞体"){
-                    g_ImGuiInput.SelectSixteenCell();
+                    g_ImGuiInput.SelectHexadeca();
                 }
                 else if(geometry == "正二十四胞体"){
-                    g_ImGuiInput.SelectTwentyFourCell();
+                    g_ImGuiInput.SelectIcositetra();
                 }
                 else if(geometry == "Clifford环面"){
                     g_ImGuiInput.SelectClifford();
@@ -647,14 +657,17 @@ void display(GLFWwindow* window){
         if(g_ImGuiInput.tesseract){
             g_Geometry = new Tesseract;
         }
+        else if(g_ImGuiInput.sphere){
+            g_Geometry = new Sphere;
+        }
         else if(g_ImGuiInput.pentatope){
             g_Geometry = new Pentatope;
         }
-        else if(g_ImGuiInput.sixteenCell){
-            g_Geometry = new SixteenCell;
+        else if(g_ImGuiInput.hexadeca){
+            g_Geometry = new Hexadeca;
         }
-        else if(g_ImGuiInput.twentyFourCell){
-            g_Geometry = new TwentyFourCell;
+        else if(g_ImGuiInput.icositetra){
+            g_Geometry = new Icositetra;
         }
         else if(g_ImGuiInput.clifford){
             g_Geometry = new Clifford;

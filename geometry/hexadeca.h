@@ -1,12 +1,13 @@
 #ifndef SIXTEEN_CELL_H
 #define SIXTEEN_CELL_H
 #include "geometry.h"
-class SixteenCell:public Geometry{
+//-choron
+class Hexadeca:public Geometry{
     vulkan::Primitive mGeometry;
     vulkan::Primitive mWireframe;
 public:
-    SixteenCell(/* args */);
-    ~SixteenCell();
+    Hexadeca(/* args */);
+    ~Hexadeca();
     virtual void Cleanup();
 
     virtual void Draw(vk::CommandBuffer command, vk::PipelineLayout layout);

@@ -1,5 +1,5 @@
-#include "sixteenCell.h"
-std::vector<Vertex> generateSixteenCell(){
+#include "hexadeca.h"
+std::vector<Vertex> generateHexadeca(){
     std::vector<Vertex> vertices = {
         // 四维坐标刚好在四个维度的正负半轴上，半径为 1.0
         Vertex(glm::vec4( 1.0f,  0.0f,  0.0f,  0.0f), glm::vec3(0.2f, 0.8f, 1.0f)), // 0 (+X)
@@ -13,7 +13,7 @@ std::vector<Vertex> generateSixteenCell(){
     };
     return vertices;
 }
-std::vector<uint16_t>generateSixteenCellIndices(bool line){
+std::vector<uint16_t>generateHexadecaIndices(bool line){
     const std::vector<uint16_t>indices_lines = {
         // +X 连接除 -X 外的所有点
         0, 2,  0, 3,  0, 4,  0, 5,  0, 6,  0, 7,
@@ -43,32 +43,32 @@ std::vector<uint16_t>generateSixteenCellIndices(bool line){
     }
     return  indices_triangles;
 }
-SixteenCell::SixteenCell(/* args */){
+Hexadeca::Hexadeca(/* args */){
 }
 
-SixteenCell::~SixteenCell(){
+Hexadeca::~Hexadeca(){
 }
 
-void SixteenCell::Cleanup(){
+void Hexadeca::Cleanup(){
     mGeometry.Destroy(*gpu.device);
     mWireframe.Destroy(*gpu.device);
 }
 
-void SixteenCell::Draw(vk::CommandBuffer command, vk::PipelineLayout layout){
+void Hexadeca::Draw(vk::CommandBuffer command, vk::PipelineLayout layout){
     mGeometry.Bind(command);
     mGeometry.Draw(command);
 }
 
-void SixteenCell::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout){
+void Hexadeca::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout){
     mWireframe.Bind(command);
     mWireframe.Draw(command);
 }
 
-void SixteenCell::Update(const void *useData){
+void Hexadeca::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
-    vertices = generateSixteenCell();
-    indices = generateSixteenCellIndices(false);
+    vertices = generateHexadeca();
+    indices = generateHexadecaIndices(false);
     if(!mGeometry.IsVaildIndex() || !mGeometry.IsVaildVertex()){
         mGeometry.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
         mGeometry.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);
@@ -77,7 +77,7 @@ void SixteenCell::Update(const void *useData){
         mGeometry.UpdateIndexData(*gpu.device, indices.data(), gpu.graphics, *gpu.pool);
         mGeometry.UpdateVertexData(*gpu.device, vertices.data(), gpu.graphics, *gpu.pool);
     }
-    indices = generateSixteenCellIndices(true);
+    indices = generateHexadecaIndices(true);
     if(!mWireframe.IsVaildIndex() || !mWireframe.IsVaildVertex()){
         mWireframe.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
         mWireframe.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);

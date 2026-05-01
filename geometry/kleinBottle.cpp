@@ -19,8 +19,8 @@ void GenerateKleinBottle(std::vector<Vertex>&vertices, std::vector<uint16_t>&ind
 
             float color_blend = pseudo_normal_z * 0.5f + 0.5f;
 
-            glm::vec3 color_outside = glm::vec3(1.0f, 0.1f, 0.1f); // 鲜红色 (代表外)
-            glm::vec3 color_inside  = glm::vec3(0.1f, 0.1f, 1.0f); // 鲜蓝色 (代表内)
+            glm::vec3 color_outside = glm::vec3(1.0f, 0.1f, 0.1f);
+            glm::vec3 color_inside  = glm::vec3(0.1f, 0.1f, 1.0f);
 
             glm::vec3 final_color = glm::mix(color_inside, color_outside, color_blend);
             

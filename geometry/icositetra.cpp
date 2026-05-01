@@ -1,5 +1,5 @@
-#include "twentyFourCell.h"
-std::vector<Vertex> generateTwentyFourCell(){
+#include "icositetra.h"
+std::vector<Vertex> generateIcositetra(){
     const std::vector<Vertex> vertices = {
         // XY 平面组 (z=0, w=0)
         Vertex(glm::vec4(1.0f,  1.0f,  0.0f,  0.0f), glm::vec3(1, 0, 0)), // 0
@@ -39,7 +39,7 @@ std::vector<Vertex> generateTwentyFourCell(){
     };
     return vertices;
 }
-std::vector<uint16_t>generateTwentyFourCellIndices(bool line){
+std::vector<uint16_t>generateIcositetraIndices(bool line){
     const std::vector<uint16_t>line_indices = {
         // XY 组连接到其他组
         0, 4,   0, 5,   1, 4,   1, 5,   2, 6,   2, 7,   3, 6,   3, 7, // XY - XZ
@@ -105,31 +105,31 @@ std::vector<uint16_t>generateTwentyFourCellIndices(bool line){
     }
     return  indices_triangles;
 }
-TwentyFourCell::TwentyFourCell(/* args */){
+Icositetra::Icositetra(/* args */){
 }
 
-TwentyFourCell::~TwentyFourCell(){
+Icositetra::~Icositetra(){
 }
-void TwentyFourCell::Cleanup(){
+void Icositetra::Cleanup(){
     mGeometry.Destroy(*gpu.device);
     mWireframe.Destroy(*gpu.device);
 }
 
-void TwentyFourCell::Draw(vk::CommandBuffer command, vk::PipelineLayout layout){
+void Icositetra::Draw(vk::CommandBuffer command, vk::PipelineLayout layout){
     mGeometry.Bind(command);
     mGeometry.Draw(command);
 }
 
-void TwentyFourCell::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout){
+void Icositetra::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout){
     mWireframe.Bind(command);
     mWireframe.Draw(command);
 }
 
-void TwentyFourCell::Update(const void *useData){
+void Icositetra::Update(const void *useData){
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
-    vertices = generateTwentyFourCell();
-    indices = generateTwentyFourCellIndices(false);
+    vertices = generateIcositetra();
+    indices = generateIcositetraIndices(false);
     if(!mGeometry.IsVaildIndex() || !mGeometry.IsVaildVertex()){
         mGeometry.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
         mGeometry.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);
@@ -138,7 +138,7 @@ void TwentyFourCell::Update(const void *useData){
         mGeometry.UpdateIndexData(*gpu.device, indices.data(), gpu.graphics, *gpu.pool);
         mGeometry.UpdateVertexData(*gpu.device, vertices.data(), gpu.graphics, *gpu.pool);
     }
-    indices = generateTwentyFourCellIndices(true);
+    indices = generateIcositetraIndices(true);
     if(!mWireframe.IsVaildIndex() || !mWireframe.IsVaildVertex()){
         mWireframe.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
         mWireframe.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);

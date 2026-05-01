@@ -1,12 +1,13 @@
 #ifndef TWENTYFOUR_CELL_H
 #define TWENTYFOUR_CELL_H
 #include "geometry.h"
-class TwentyFourCell:public Geometry{
+//-choron
+class Icositetra:public Geometry{
     vulkan::Primitive mGeometry;
     vulkan::Primitive mWireframe;
 public:
-    TwentyFourCell(/* args */);
-    ~TwentyFourCell();
+    Icositetra(/* args */);
+    ~Icositetra();
     virtual void Cleanup();
 
     virtual void Draw(vk::CommandBuffer command, vk::PipelineLayout layout);

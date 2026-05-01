@@ -1,16 +1,16 @@
 #include "cylinder.h"
-mglm::vec4 bezier(const mglm::vec4& p0, const mglm::vec4& p1, const mglm::vec4& p2, const mglm::vec4& p3, float t) {
+template<typename VecType>
+VecType bezier(const VecType& p0, const VecType& p1, const VecType& p2, const VecType& p3, float t) {
     float u = 1.0f - t;
     return p0 * (u*u*u) + p1 * (3*u*u*t) + p2 * (3*u*t*t) + p3 * (t*t*t);
 }
 
 // 四维贝塞尔曲线求导
-mglm::vec4 bezierTangent(const mglm::vec4& p0, const mglm::vec4& p1, const mglm::vec4& p2, const mglm::vec4& p3, float t) {
+template<typename VecType>
+VecType bezierTangent(const VecType& p0, const VecType& p1, const VecType& p2, const VecType& p3, float t) {
     float u = 1.0f - t;
     return (p1 - p0) * (3*u*u) + (p2 - p1) * (6*u*t) + (p3 - p2) * (3*t*t);
 }
-
-// 构建与切向量 T 正交的三维初始标架 (N1, N2, N3)
 void findInitialFrame(const mglm::vec4& T, mglm::vec4& N1, mglm::vec4& N2, mglm::vec4& N3) {
     mglm::vec4 axes[4] = {
         mglm::vec4(1,0,0,0), mglm::vec4(0,1,0,0),
@@ -44,8 +44,6 @@ void findInitialFrame(const mglm::vec4& T, mglm::vec4& N1, mglm::vec4& N2, mglm:
     N3 = c - T * mglm::dot(T, c) - N1 * mglm::dot(N1, c) - N2 * mglm::dot(N2, c);
     N3 = mglm::normalize(N3);
 }
-
-// 四维标架平行移动 (将三个法向量一起投影并重新正交化，消除多余旋转自由度)
 bool transportFrame(const mglm::vec4& N1_prev, const mglm::vec4& N2_prev, const mglm::vec4& N3_prev, const mglm::vec4& T_curr, mglm::vec4& N1_curr, mglm::vec4& N2_curr, mglm::vec4& N3_curr) {
     mglm::vec4 u1 = N1_prev - T_curr * mglm::dot(T_curr, N1_prev);
     mglm::vec4 u2 = N2_prev - T_curr * mglm::dot(T_curr, N2_prev);
@@ -88,8 +86,7 @@ void generateCurvedCylinder(std::vector<Vertex>& vertices, std::vector<uint16_t>
     findInitialFrame(tangents[0], normals1[0], normals2[0], normals3[0]);
     
     for (int i = 1; i <= samples; ++i) {
-        if (!transportFrame(normals1[i-1], normals2[i-1], normals3[i-1],
-                              tangents[i], normals1[i], normals2[i], normals3[i])) {
+        if (!transportFrame(normals1[i-1], normals2[i-1], normals3[i-1], tangents[i], normals1[i], normals2[i], normals3[i])) {
             findInitialFrame(tangents[i], normals1[i], normals2[i], normals3[i]);
         }
     }
@@ -106,6 +103,60 @@ void generateCurvedCylinder(std::vector<Vertex>& vertices, std::vector<uint16_t>
             mglm::vec4 vertexPos = center + offset;
             
             vertices.push_back(Vertex(glm::vec4(vertexPos.x, vertexPos.y, vertexPos.z, vertexPos.w), glm::vec3(vertexPos.x)));
+        }
+    }
+    
+    for (int i = 0; i < samples; ++i) {
+        int row0 = baseIndex + i * segments;
+        int row1 = row0 + segments;
+        
+        for (int j = 0; j < segments; ++j) {
+            int next_j = (j + 1) % segments;
+            
+            indices.push_back(row0 + j);
+            indices.push_back(row1 + j);
+            indices.push_back(row0 + next_j);
+            
+            indices.push_back(row0 + next_j);
+            indices.push_back(row1 + j);
+            indices.push_back(row1 + next_j);
+        }
+    }
+}
+void generateCurvedCylinder(std::vector<Vertex>& vertices, std::vector<uint16_t>& indices,
+    const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3,
+    float radius, int samples, int segments
+) {
+    uint16_t baseIndex = static_cast<uint16_t>(vertices.size());
+    
+    std::vector<glm::vec3> centers(samples + 1);
+    std::vector<glm::vec3> tangents(samples + 1);
+    
+    for (int i = 0; i <= samples; ++i) {
+        float t = static_cast<float>(i) / samples;
+        centers[i] = bezier(p0, p1, p2, p3, t);
+        tangents[i] = glm::normalize(bezierTangent(p0, p1, p2, p3, t));
+    }
+    
+    for (int i = 0; i <= samples; ++i) {
+        const glm::vec3& center = centers[i];
+        const glm::vec3& tangent = tangents[i];
+        
+        glm::vec3 up(0, 1, 0);
+        if (std::abs(glm::dot(tangent, up)) > 0.99f) {
+            up = glm::vec3(1, 0, 0);
+        }
+        
+        glm::vec3 right = glm::normalize(glm::cross(up, tangent));
+        up = glm::normalize(glm::cross(tangent, right));
+        
+        for (int j = 0; j < segments; ++j) {
+            float angle = 2.0f * M_PI * static_cast<float>(j) / segments;
+            
+            glm::vec3 offset = right * std::cos(angle) * radius + up * std::sin(angle) * radius;
+            glm::vec3 vertexPos = center + offset;
+            
+            vertices.emplace_back(glm::vec4(vertexPos, 0), vertexPos); 
         }
     }
     
@@ -155,6 +206,53 @@ void Cylinder::Update(const void *useData){
         mglm::vec4(parameter.point[1][0], parameter.point[1][1], parameter.point[1][2], parameter.point[1][3]),
         mglm::vec4(parameter.point[2][0], parameter.point[2][1], parameter.point[2][2], parameter.point[2][3]),
         mglm::vec4(parameter.point[3][0], parameter.point[3][1], parameter.point[3][2], parameter.point[3][3]), parameter.radius, parameter.samples, parameter.segments);
+    if(!mGeometry.IsVaildIndex() || !mGeometry.IsVaildVertex()){
+        mGeometry.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
+        mGeometry.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);
+    }
+    else{
+        mGeometry.UpdateIndexData(*gpu.device, indices.data(), gpu.graphics, *gpu.pool);
+        mGeometry.UpdateVertexData(*gpu.device, vertices.data(), gpu.graphics, *gpu.pool);
+    }
+    if(!mWireframe.IsVaildIndex() || !mWireframe.IsVaildVertex()){
+        mWireframe.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
+        mWireframe.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);
+    }
+    else{
+        mWireframe.UpdateIndexData(*gpu.device, indices.data(), gpu.graphics, *gpu.pool);
+        mWireframe.UpdateVertexData(*gpu.device, vertices.data(), gpu.graphics, *gpu.pool);
+    }
+}
+
+Font::Font(/* args */){
+}
+
+Font::~Font(){
+}
+void Font::Cleanup(){
+    mGeometry.Destroy(*gpu.device);
+    mWireframe.Destroy(*gpu.device);
+}
+
+void Font::Draw(vk::CommandBuffer command, vk::PipelineLayout layout){
+    mGeometry.Bind(command);
+    mGeometry.Draw(command);
+}
+
+void Font::DrawWireframe(vk::CommandBuffer command, vk::PipelineLayout layout){
+    mWireframe.Bind(command);
+    mWireframe.Draw(command);
+}
+
+void Font::Update(const void *useData){
+    std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
+    CylinderParameter parameter = *(CylinderParameter *)useData;
+    generateCurvedCylinder(vertices, indices,
+        glm::vec3(parameter.point[0][0], parameter.point[0][1], parameter.point[0][2]),
+        glm::vec3(parameter.point[1][0], parameter.point[1][1], parameter.point[1][2]),
+        glm::vec3(parameter.point[2][0], parameter.point[2][1], parameter.point[2][2]),
+        glm::vec3(parameter.point[3][0], parameter.point[3][1], parameter.point[3][2]), parameter.radius, parameter.samples, parameter.segments);
     if(!mGeometry.IsVaildIndex() || !mGeometry.IsVaildVertex()){
         mGeometry.CreateIndexBuffer(*gpu.device, indices.data(), sizeof(uint16_t) * indices.size(), gpu.graphics, *gpu.pool);
         mGeometry.CreateVertexBuffer(*gpu.device, vertices.data(), sizeof(Vertex) * vertices.size(), vertices.size(), gpu.graphics, *gpu.pool);
